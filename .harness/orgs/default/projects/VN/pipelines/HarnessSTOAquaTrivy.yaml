@@ -43,7 +43,7 @@ pipeline:
                       type: container
                       detection: manual
                       name: vikramtek/harness-sto-aqua-trivy:STO_Image
-                      variant: docker
+                      variant: <+pipeline.variables.current_version>
                     advanced:
                       log:
                         level: info
