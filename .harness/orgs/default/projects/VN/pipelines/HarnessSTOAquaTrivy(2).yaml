@@ -4,6 +4,17 @@ pipeline:
   projectIdentifier: VN
   orgIdentifier: default
   tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: STO
+        build: <+input>
+  pipeline:
+    name: Harness-STO-Aqua-Trivy-2
+    identifier: HarnessSTOAquaTrivy2
+    projectIdentifier: VN
+    orgIdentifier: default
+    tags: {}
   stages:
     - stage:
         name: build
@@ -53,7 +64,5 @@ pipeline:
           slsa_provenance:
             enabled: false
         description: ""
-  identifier: trivyorchestration
-  name: trivy-orchestration
-
-
+identifier: trivyorchestration
+name: trivy-orchestration
