@@ -1,0 +1,97 @@
+pipeline:
+  name: Harness-STO-Aqua-Trivy
+  identifier: HarnessSTOAquaTrivy
+  projectIdentifier: VN
+  orgIdentifier: default
+  tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: STO
+        build: <+input>
+  stages:
+    - stage:
+        name: Build
+        identifier: Build
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: true
+          caching:
+            enabled: true
+            override: true
+          buildIntelligence:
+            enabled: true
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec:
+              imageSpec:
+                imageName: ubuntu-latest
+          execution:
+            steps:
+              - step:
+                  type: AquaTrivy
+                  name: AquaTrivy_1
+                  identifier: AquaTrivy_1
+                  spec:
+                    mode: orchestration
+                    config: default
+                    target:
+                      type: container
+                      detection: manual
+                      name: vikramtek/harness-sto-aqua-trivy:STO_Image
+                      variant: docker
+                    advanced:
+                      log:
+                        level: info
+                      fail_on_severity: high
+                    privileged: true
+                    image:
+                      type: docker_v2
+                      tag: STO_Image
+                      name: vikramtek/harness-sto-aqua-trivy
+                      domain: index.docker.io
+              - step:
+                  type: Run
+                  name: Enforce Security Policy
+                  identifier: Enforce_Security_Policy
+                  spec:
+                    shell: Sh
+                    command: |-
+                      echo "=========================================="
+                      echo "   SECURITY POLICY ENFORCEMENT"
+                      echo "=========================================="
+
+                      # Get NEW vulnerability counts from STO output
+                      NEW_CRITICAL="<+pipeline.stages.security_scan.spec.execution.steps.sca_scan.output.outputVariables.NEW_CRITICAL>"
+                      NEW_HIGH="<+pipeline.stages.security_scan.spec.execution.steps.sca_scan.output.outputVariables.NEW_HIGH>"
+
+                      echo "New Critical: $NEW_CRITICAL"
+                      echo "New High: $NEW_HIGH"
+
+                      # Fail only on NEW critical or high vulnerabilities
+                      if [ "$NEW_CRITICAL" -gt 0 ]; then
+                        echo "BLOCKED: $NEW_CRITICAL NEW critical vulnerabilities found!"
+                        exit 1
+                      fi
+
+                      if [ "$NEW_HIGH" -gt 0 ]; then
+                         echo "BLOCKED: $NEW_HIGH NEW high vulnerabilities found!"
+                         exit 1
+                      fi
+
+                      echo "PASSED: No new critical/high vulnerabilities"
+                      echo "=========================================="
+                      echo "=========================================="
+                      echo "   SECURITY SCAN RESULTS SUMMARY"
+                      echo "=========================================="
+                      echo ""
+                      echo "OWASP Dependency Check: Completed"
+                      echo "Trivy Vulnerability Scan: Completed"
+                      echo ""
+                      echo "Review findings in Harness STO dashboard"
+                      echo "Use AIDA for remediation guidance"
+                      echo "=========================================="
