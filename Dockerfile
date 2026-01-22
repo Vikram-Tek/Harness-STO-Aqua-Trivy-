@@ -9,3 +9,16 @@ WORKDIR /app
 ADD ./run.py /app
 ADD ./sqli /app/sqli
 ADD ./config /app/config
+RUN yum install -y \
+    openssl \
+    openssl-libs \
+    curl \
+    wget \
+    bash \
+    tar \
+    gzip \
+    vim \
+    git \
+    shadow-utils \
+    sudo \
+    && yum clean all
