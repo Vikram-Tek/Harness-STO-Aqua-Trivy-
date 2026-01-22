@@ -17,6 +17,11 @@ RUN yum install -y nodejs npm && \
 ENV PYTHON ${PYTHON_VERSION_UBI}
 COPY requirements.txt /tmp
 RUN rm -rf /tmp/requirements.txt
+ENV PYTHON ${PYTHON_VERSION_UBI}
+COPY requirements.txt /tmp
+RUN pip3 install Django==2.0.13 requests==2.6.0 urllib3==1.24.1 pyyaml==5.3.1 pillow==6.2.0
+RUN pip3 install --no-cache-dir -r /tmp/requirements.txt
+RUN rm -rf /tmp/requirements.txt
 WORKDIR /app
 ADD ./run.py /app
 ADD ./sqli /app/sqli
