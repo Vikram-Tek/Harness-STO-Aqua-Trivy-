@@ -1,5 +1,5 @@
 ## build image containing the required foundation artifacts
-FROM debian:trixie-slim
+FROM registry.access.redhat.com/ubi8/ubi:latest
 USER root
 WORKDIR /foundation
 ENV PYTHON ${PYTHON_VERSION_UBI}
