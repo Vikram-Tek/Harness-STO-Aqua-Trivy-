@@ -4,55 +4,49 @@ pipeline:
   projectIdentifier: VN
   orgIdentifier: default
   tags: {}
-
+  properties:
+    ci:
+      codebase:
+        connectorRef: STO
+        build: <+input>
   stages:
-
-    # -------------------------------------------------
-    # STAGE 1: BUILD & PUSH IMAGE (REQUIRED)
-    # -------------------------------------------------
     - stage:
-        name: build_and_push
-        identifier: build_and_push
+        name: Build
+        identifier: Build
+        description: ""
         type: CI
         spec:
           cloneCodebase: true
-          execution:
-            steps:
-              - step:
-                  type: BuildAndPushDockerRegistry
-                  name: Build_and_Push_Image
-                  identifier: Build_and_Push_Image
-                  spec:
-                    connectorRef: Vikram_Docker        # Docker Hub connector
-                    repo: vikramtek/harness-sto-aqua-trivy
-                    tags:
-                      - <+pipeline.sequenceId>
+          caching:
+            enabled: true
+            override: true
+            paths: []
+          buildIntelligence:
+            enabled: true
           platform:
             os: Linux
             arch: Amd64
           runtime:
             type: Cloud
-
-    # -------------------------------------------------
-    # STAGE 2: AQUA TRIVY STO SCAN + ENFORCEMENT
-    # -------------------------------------------------
-    - stage:
-        name: security_scan
-        identifier: security_scan
-        type: CI
-        spec:
-          cloneCodebase: false
-          sharedPaths:
-            - /var/run
-            - /shared/scan_results
+            spec:
+              imageSpec:
+                imageName: ubuntu-latest
           execution:
             steps:
-
-              # -------- Aqua Trivy STO Scan --------
+              - step:
+                  type: BuildAndPushDockerRegistry
+                  name: BuildAndPushDockerRegistry_3
+                  identifier: BuildAndPushDockerRegistry_3
+                  spec:
+                    connectorRef: Vikram_Docker
+                    repo: vikramtek/harness-sto-aqua-trivy
+                    tags:
+                      - <+pipeline.sequenceId>
+                    caching: true
               - step:
                   type: AquaTrivy
-                  name: AquaTrivy_2
-                  identifier: AquaTrivy_2
+                  name: AquaTrivy_1
+                  identifier: AquaTrivy_1
                   spec:
                     mode: orchestration
                     config: default
@@ -70,44 +64,37 @@ pipeline:
                     privileged: true
                     image:
                       type: docker_v2
-                      name: vikramtek/harness-sto-aqua-trivy
                       tag: <+pipeline.sequenceId>
+                      name: vikramtek/harness-sto-aqua-trivy
                       domain: index.docker.io
-                    sbom:
-                      format: spdx-json
-
-              # -------- Enforcement Policy --------
               - step:
                   type: Run
                   name: Security_Enforcement
                   identifier: Security_Enforcement
                   spec:
-                    shell: Bash
-                    command: |
-                      echo "=========================================="
-                      echo "   SECURITY POLICY ENFORCEMENT (AQUA TRIVY)"
-                      echo "=========================================="
+                    shell: Sh
+                    command: |-
+                      cho "=========================================="
+                                            echo "   SECURITY POLICY ENFORCEMENT (AQUA TRIVY)"
+                                            echo "=========================================="
 
-                      NEW_CRITICAL="<+pipeline.stages.security_scan.spec.execution.steps.AquaTrivy_2.output.outputVariables.NEW_CRITICAL>"
-                      NEW_HIGH="<+pipeline.stages.security_scan.spec.execution.steps.AquaTrivy_2.output.outputVariables.NEW_HIGH>"
+                                            NEW_CRITICAL="<+pipeline.stages.security_scan.spec.execution.steps.AquaTrivy_2.output.outputVariables.NEW_CRITICAL>"
+                                            NEW_HIGH="<+pipeline.stages.security_scan.spec.execution.steps.AquaTrivy_2.output.outputVariables.NEW_HIGH>"
 
-                      echo "New Critical Vulnerabilities : $NEW_CRITICAL"
-                      echo "New High Vulnerabilities     : $NEW_HIGH"
+                                            echo "New Critical Vulnerabilities : $NEW_CRITICAL"
+                                            echo "New High Vulnerabilities     : $NEW_HIGH"
 
-                      if [ "$NEW_CRITICAL" -gt 0 ]; then
-                        echo "❌ BLOCKED: NEW critical vulnerabilities detected!"
-                        exit 1
-                      fi
+                                            if [ "$NEW_CRITICAL" -gt 0 ]; then
+                                              echo "❌ BLOCKED: NEW critical vulnerabilities detected!"
+                                              exit 1
+                                            fi
 
-                      if [ "$NEW_HIGH" -gt 0 ]; then
-                        echo "❌ BLOCKED: NEW high vulnerabilities detected!"
-                        exit 1
-                      fi
+                                            if [ "$NEW_HIGH" -gt 0 ]; then
+                                              echo "❌ BLOCKED: NEW high vulnerabilities detected!"
+                                              exit 1
+                                            fi
 
-                      echo "✅ PASSED: No new high or critical vulnerabilities"
-
-          platform:
-            os: Linux
-            arch: Amd64
-          runtime:
-            type: Cloud
+                                            echo "✅ PASSED: No new high or critical vulnerabilities"
+          sharedPaths:
+            - "  - /var/run "
+            - " - /shared/scan_results"
