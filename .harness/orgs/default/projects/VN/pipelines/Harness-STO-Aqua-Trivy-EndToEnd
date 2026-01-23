@@ -96,5 +96,5 @@ pipeline:
 
                                             echo "✅ PASSED: No new high or critical vulnerabilities"
           sharedPaths:
-            - "  - /var/run "
-            - " - /shared/scan_results"
+            - /var/run
+            - /shared/scan_results"
