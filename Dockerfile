@@ -1,5 +1,5 @@
 ## build image containing the required foundation artifacts
-FROM registry.access.redhat.com/ubi8/ubi:latest
+FROM registry.redhat.io/ubi8/ubi:8.10-1759868560
 USER root
 WORKDIR /foundation
 ENV PYTHON ${PYTHON_VERSION_UBI}
