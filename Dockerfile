@@ -46,6 +46,8 @@ RUN curl -sL https://rpm.nodesource.com/setup_14.x | bash - && \
 # --------------------------------------------------
 # App setup
 # --------------------------------------------------
+ARG BUILD_TS
+RUN echo "Build timestamp: ${BUILD_TS}"
 WORKDIR /app
 ADD ./run.py /app
 ADD ./sqli /app/sqli
