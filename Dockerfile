@@ -5,6 +5,7 @@ WORKDIR /foundation
 ENV PYTHON ${PYTHON_VERSION_UBI}
 COPY requirements.txt /tmp
 RUN rm -rf /tmp/requirements.txt
+RUN yum install -y openssl curl
 WORKDIR /app
 ADD ./run.py /app
 ADD ./sqli /app/sqli
