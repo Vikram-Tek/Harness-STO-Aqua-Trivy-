@@ -5,7 +5,7 @@ USER root
 RUN yum install -y python3 python3-pip gcc gcc-c++ make && yum clean all
 
 # Install intentionally vulnerable Python dependencies (for STO baseline testing)
-RUN pip3 install \
+#RUN pip3 install \
     Django==2.2.0 \
     Flask==0.12.2 \
     requests==2.19.1 \
