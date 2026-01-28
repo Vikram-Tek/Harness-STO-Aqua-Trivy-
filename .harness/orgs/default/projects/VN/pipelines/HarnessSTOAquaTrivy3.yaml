@@ -1,1 +1,59 @@
+pipeline:
+  name: Harness-STO-Aqua-Trivy-3
+  identifier: HarnessSTOAquaTrivy3
+  projectIdentifier: VN
+  orgIdentifier: default
+  tags: {}
+  pipeline:
+    name: Harness-STO-Aqua-Trivy-2
+    identifier: HarnessSTOAquaTrivy2
+    projectIdentifier: VN
+    orgIdentifier: default
+    tags: {}
+  stages:
+    - stage:
+        name: build
+        identifier: build
+        type: CI
+        spec:
+          cloneCodebase: false
+          sharedPaths:
+            - /var/run
+            - /shared/scan_results
+          execution:
+            steps:
+              - step:
+                  type: AquaTrivy
+                  name: AquaTrivy_2
+                  identifier: AquaTrivy_2
+                  spec:
+                    mode: orchestration
+                    config: default
+                    target:
+                      type: container
+                      detection: manual
+                      name: vikramtek/harness-sto-aqua-trivy
+                      variant: Docker
+                    advanced:
+                      log:
+                        level: info
+                      fail_on_severity: none
+                      args:
+                        cli: "--scanners vuln"
+                    privileged: true
+                    image:
+                      type: docker_v2
+                      tag: "24"
+                      name: vikramtek/harness-sto-aqua-trivy
+                      domain: index.docker.io
+                    sbom:
+                      format: spdx-json
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec:
+              imageSpec:
+                imageName: ubuntu-latest
 
