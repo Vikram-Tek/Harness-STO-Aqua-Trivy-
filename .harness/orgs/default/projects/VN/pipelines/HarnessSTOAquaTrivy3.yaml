@@ -4,50 +4,25 @@ pipeline:
   projectIdentifier: VN
   orgIdentifier: default
   tags: {}
-  pipeline:
-    name: Harness-STO-Aqua-Trivy-2
-    identifier: HarnessSTOAquaTrivy2
-    projectIdentifier: VN
-    orgIdentifier: default
-    tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: STO
+        build: <+input>
   stages:
     - stage:
-        name: build
-        identifier: build
+        name: Build
+        identifier: Build
+        description: ""
         type: CI
         spec:
-          cloneCodebase: false
-          sharedPaths:
-            - /var/run
-            - /shared/scan_results
-          execution:
-            steps:
-              - step:
-                  type: AquaTrivy
-                  name: AquaTrivy_2
-                  identifier: AquaTrivy_2
-                  spec:
-                    mode: orchestration
-                    config: default
-                    target:
-                      type: container
-                      detection: manual
-                      name: vikramtek/harness-sto-aqua-trivy
-                      variant: Docker
-                    advanced:
-                      log:
-                        level: info
-                      fail_on_severity: none
-                      args:
-                        cli: "--scanners vuln"
-                    privileged: true
-                    image:
-                      type: docker_v2
-                      tag: "24"
-                      name: vikramtek/harness-sto-aqua-trivy
-                      domain: index.docker.io
-                    sbom:
-                      format: spdx-json
+          cloneCodebase: true
+          caching:
+            enabled: true
+            override: true
+            paths: []
+          buildIntelligence:
+            enabled: true
           platform:
             os: Linux
             arch: Amd64
@@ -56,4 +31,18 @@ pipeline:
             spec:
               imageSpec:
                 imageName: ubuntu-latest
-
+          sharedPaths:
+            - /var/run
+            - /shared/scan_results
+          execution:
+            steps:
+              - step:
+                  type: BuildAndPushDockerRegistry
+                  name: BuildAndPushDockerRegistry_3
+                  identifier: BuildAndPushDockerRegistry_3
+                  spec:
+                    connectorRef: Vikram_Docker
+                    repo: vikramtek/harness-sto-aqua-trivy2
+                    tags:
+                      - <+pipeline.sequenceId>
+                    caching: true
